@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+
+set -e 
+
+BP_DIR="$(cd "$(dirname "$0")" && pwd)"
+BUILD_DIR=$1
+CACHE_DIR=$2
+OPT_DIR=$BP_DIR/../opt/
+PROFILED_DIR=$BUILD_DIR/.profile.d
+
+GOHOME=$BUILD_DIR/.gohome
+export GOROOT=$GOHOME/go
+export GOPATH=$BUILD_DIR/go
+export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+
+mkdir -p $GOROOT/bin
+cd $GOHOME
+
+echo "downloading golang..."
+curl -O  https://storage.googleapis.com/golang/go1.8.3.linux-amd64.tar.gz
+tar -xvf go1.8.3.linux-amd64.tar.gz
+
+mkdir -p $PROFILED_DIR
+
+# put this under .profile.d so that the dyno gets it at runtime
+cat <<EOF > ${PROFILED_DIR}/golang.sh
+#!/bin/bash
+set -e
+export GOHOME=/app/.gohome
+export GOROOT=/app/.gohome/go
+export GOPATH=/app/go
+export PATH=/app/go/bin:/app/.gohome/go/bin:$PATH
+EOF
+
+# for future buildpacks during slug compilation 
+cat <<EOF > ${BP_DIR}/export
+#!/bin/bash
+set -e
+export GOHOME=$GOHOME
+export GOROOT=$GOROOT
+export GOPATH=$BUILD_DIR/go
+export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+EOF
+
+chmod +x ${PROFILED_DIR}/golang.sh
+chmod +x ${BP_DIR}/export
+
+echo "-----> Installed GoLang1.8.3"
+
+which go
+
+echo "grabbing oauth2_proxy..."
+
+go get github.com/pallavkothari/oauth2_proxy 
+
+echo "got it"
+
+fetch_nginx_tarball() {
+    local version="1.9.7"
+    local tarball_file="nginx-$version.tgz"
+    local stack="cedar-14"
+    local nginx_tarball_url="https://s3-external-1.amazonaws.com/heroku-buildpack-ruby/nginx/$stack/nginx-$version-ngx_mruby.tgz"
+    local dest_path="$CACHE_DIR/$stack/$tarball_file"
+
+    if [ -f "$dest_path" ]; then
+        echo -n "cat $dest_path"
+    else
+        echo -n "curl -L $nginx_tarball_url"
+    fi
+}
+
+
+heroku_bin_dir=$BUILD_DIR/.heroku/bin
+mkdir -p $heroku_bin_dir
+
+nginx_dir=$BUILD_DIR/.nginx
+nginx_bin_dir=$nginx_dir/bin
+mkdir -p $nginx_bin_dir
+
+$(fetch_nginx_tarball) | tar xzC $nginx_bin_dir
+cp $OPT_DIR/web $nginx_dir/bin/nginx-start
+chmod +x $nginx_dir/bin/nginx-start
+
+cat <<EOF > ${BUILD_DIR}/nginx-start.sh
+#!/bin/bash
+set -eu
+    if [ -f .nginx/bin/nginx-start ]; then
+        cd .nginx > /dev/null 2>&1
+        eval "bin/nginx-start &"
+        cd - > /dev/null 2>&1
+    else
+        echo "No .nginx/bin/nginx-start file found!"
+        exit 1
+    fi
+EOF
+
+chmod +x ${BUILD_DIR}/nginx-start.sh
+
+echo "-----> Installed nginx"
+
+cp $OPT_DIR/nginx.conf.erb $nginx_dir/
+
