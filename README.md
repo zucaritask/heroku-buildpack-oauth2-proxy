@@ -7,16 +7,20 @@ heroku buildpacks:add https://github.com/pallavkothari/heroku-buildpack-oauth2-p
 
 From your Procfile you can then run `oauth2_proxy` as usual (in addition to kicking off your own http backend on port 8080): 
 ```bash
-oauth2_proxy \
+/app/go/bin/oauth2_proxy \
+   --http-address=http://:$PORT \
    --email-domain="*"  \
    --cookie-secret="supersecret" \
    --provider="github" \
    --client-id=my-client-id \
    --client-secret=my-client-secret \
    --upstream=http://localhost:8080/ \
-   --redirect-url=http://localhost:4180/oauth2/callback \
-   --cookie-domain=localhost \
+   --redirect-url=https://YOUR_HEROKU_APP/oauth2/callback \
+   --cookie-domain=YOUR_DOMAIN \
    --cookie-secure=true \
+   --set-xauthrequest=true \   
 ```
 
-See oauth2_proxy's README for more details.
+Obviously, this is just an example. See oauth2_proxy's README for more details.  
+In particular, I recommend using environment variables whenever possible (e.g. cookie secret, client id, client secret)
+
