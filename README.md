@@ -5,9 +5,23 @@ Installs [oauth2_proxy](https://github.com/pallavkothari/oauth2_proxy) along wit
 heroku buildpacks:add https://github.com/pallavkothari/heroku-buildpack-oauth2-proxy
 ```
 
-From your Procfile you can then run `oauth2_proxy` as usual (in addition to kicking off your own http backend on port 8080): 
+## Starting on heroku 
+This buildpack will generate a `start-oauth2-proxy.sh` script in the build directory. You simply need to call this script from your Procfile and start your http backend on port 8080. 
+
+Note that the following environment variables are required: 
+
+- PROVIDER (e.g. github, facebook, etc)
+- OAUTH2_PROXY_CLIENT_ID
+- OAUTH2_PROXY_CLIENT_SECRET
+- OAUTH2_PROXY_COOKIE_SECRET
+- APP (e.g. https://yourapp.herokuapp.com or localhost:4180)
+- COOKIE_DOMAIN (e.g. yourapp.herokuapp.com)
+
+
+## Starting manually
+
 ```bash
-/app/go/bin/oauth2_proxy \
+oauth2_proxy \
    --http-address=http://:$PORT \
    --email-domain="*"  \
    --cookie-secret="supersecret" \

@@ -22,6 +22,35 @@ tar -xvf go1.8.3.linux-amd64.tar.gz
 
 mkdir -p $PROFILED_DIR
 
+# write out a start script 
+cat <<EOF > ${BUILD_DIR}/start-oauth2-proxy.sh
+#!/usr/bin/env bash
+
+set -e
+
+
+if [ -z ${FOO+x} ]; then echo "please set FOO"; exit; fi
+if [ -z ${PORT+x} ]; then echo "please set PORT"; exit; fi
+if [ -z ${COOKIE_DOMAIN+x} ]; then echo "please set COOKIE_DOMAIN"; exit; fi
+if [ -z ${PROVIDER+x} ]; then echo "please set PROVIDER"; exit; fi
+if [ -z ${APP+x} ]; then echo "please set APP"; exit; fi
+if [ -z ${OAUTH2_PROXY_CLIENT_ID+x} ]; then echo "please set OAUTH2_PROXY_CLIENT_ID"; exit; fi
+if [ -z ${OAUTH2_PROXY_CLIENT_SECRET+x} ]; then echo "please set OAUTH2_PROXY_CLIENT_SECRET"; exit; fi
+if [ -z ${OAUTH2_PROXY_COOKIE_SECRET+x} ]; then echo "please set OAUTH2_PROXY_COOKIE_SECRET"; exit; fi
+
+echo "starting oauth2_proxy..."
+oauth2_proxy  \
+--http-address=http://:$PORT \
+--cookie-secure=false \
+--cookie-domain=${COOKIE_DOMAIN} \
+--provider="${PROVIDER}" \
+--email-domain="*" \
+--redirect-url=${APP}/oauth2/callback \
+--set-xauthrequest=true \
+--pass-access-token=true \
+--upstream=http://127.0.0.1:8080 &
+EOF
+
 # put this under .profile.d so that the dyno gets it at runtime
 cat <<EOF > ${PROFILED_DIR}/golang.sh
 #!/bin/bash
