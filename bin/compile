@@ -38,12 +38,12 @@ if [ -z \${OAUTH2_PROXY_COOKIE_SECRET+x} ]; then echo "please set OAUTH2_PROXY_C
 
 echo "starting oauth2_proxy..."
 oauth2_proxy  \
---http-address=http://:$PORT \
+--http-address=http://:\$PORT \
 --cookie-secure=false \
---cookie-domain=${COOKIE_DOMAIN} \
---provider="${PROVIDER}" \
+--cookie-domain=\${COOKIE_DOMAIN} \
+--provider="\${PROVIDER}" \
 --email-domain="*" \
---redirect-url=${APP}/oauth2/callback \
+--redirect-url=\${APP}/oauth2/callback \
 --set-xauthrequest=true \
 --pass-access-token=true \
 --upstream=http://127.0.0.1:8080 &
