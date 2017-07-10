@@ -28,8 +28,6 @@ cat <<EOF > ${BUILD_DIR}/start-oauth2-proxy.sh
 
 set -e
 
-
-if [ -z ${FOO+x} ]; then echo "please set FOO"; exit; fi
 if [ -z ${PORT+x} ]; then echo "please set PORT"; exit; fi
 if [ -z ${COOKIE_DOMAIN+x} ]; then echo "please set COOKIE_DOMAIN"; exit; fi
 if [ -z ${PROVIDER+x} ]; then echo "please set PROVIDER"; exit; fi
@@ -71,6 +69,7 @@ export GOPATH=$BUILD_DIR/go
 export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 EOF
 
+chmod +x ${BUILD_DIR}/start-oauth2-proxy.sh
 chmod +x ${PROFILED_DIR}/golang.sh
 chmod +x ${BP_DIR}/export
 
