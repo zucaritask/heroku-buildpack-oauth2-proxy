@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e 
+set -e
 
 BP_DIR="$(cd "$(dirname "$0")" && pwd)"
 BUILD_DIR=$1
@@ -22,7 +22,7 @@ tar -xvf go1.8.3.linux-amd64.tar.gz
 
 mkdir -p $PROFILED_DIR
 
-# write out a start script 
+# write out a start script
 cat <<EOF > ${BUILD_DIR}/start-oauth2-proxy.sh
 #!/usr/bin/env bash
 
@@ -39,7 +39,7 @@ if [ -z \${OAUTH2_PROXY_COOKIE_SECRET+x} ]; then echo "please set OAUTH2_PROXY_C
 echo "starting oauth2_proxy..."
 oauth2_proxy  \
 --http-address=http://:\$PORT \
---cookie-secure=false \
+--cookie-secure=true \
 --cookie-domain=\${COOKIE_DOMAIN} \
 --provider="\${PROVIDER}" \
 --email-domain="*" \
@@ -59,7 +59,7 @@ export GOPATH=/app/go
 export PATH=/app/go/bin:/app/.gohome/go/bin:$PATH
 EOF
 
-# for future buildpacks during slug compilation 
+# for future buildpacks during slug compilation
 cat <<EOF > ${BP_DIR}/export
 #!/bin/bash
 set -e
@@ -79,7 +79,6 @@ which go
 
 echo "grabbing oauth2_proxy..."
 
-go get github.com/pallavkothari/oauth2_proxy 
+go get github.com/pallavkothari/oauth2_proxy
 
 echo "got it"
-
