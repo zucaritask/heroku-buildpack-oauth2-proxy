@@ -45,7 +45,7 @@ oauth2_proxy  \
 --redirect-url=\${APP}/oauth2/callback \
 --set-xauthrequest=true \
 --pass-access-token=true \
---upstream=http://127.0.0.1:8080 &
+--upstream=https://127.0.0.1:8080 &
 EOF
 
 # put this under .profile.d so that the dyno gets it at runtime
