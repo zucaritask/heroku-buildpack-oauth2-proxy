@@ -1,83 +1,18 @@
 #!/usr/bin/env bash
 
-set -e
+set -eo pipefail
 
-BP_DIR="$(cd "$(dirname "$0")" && pwd)"
-BUILD_DIR=$1
-CACHE_DIR=$2
-OPT_DIR=$BP_DIR/../opt/
-PROFILED_DIR=$BUILD_DIR/.profile.d
+BP_DIR="$(cd $(dirname "$0"); pwd)"
+BUILD_DIR="$1"
 
-GOHOME=$BUILD_DIR/.gohome
-export GOROOT=$GOHOME/go
-export GOPATH=$BUILD_DIR/go
-export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+mkdir -p "$BUILD_DIR/bin"
 
-mkdir -p $GOROOT/bin
-cd $GOHOME
-
-echo "downloading golang..."
-curl -O  https://storage.googleapis.com/golang/go1.8.3.linux-amd64.tar.gz
-tar -xvf go1.8.3.linux-amd64.tar.gz
-
-mkdir -p $PROFILED_DIR
+echo "downloading oauth2_proxy..."
+wget https://github.com/pusher/oauth2_proxy/releases/download/v3.1.0/oauth2_proxy-v3.1.0.linux-amd64.go1.11.tar.gz
+tar -xzf oauth2_proxy-*.tar.gz
+rm oauth2_proxy-*.tar.gz
+mv release/oauth2_proxy-linux-amd64 $BUILD_DIR/bin/oauth2_proxy
+rmdir release
 
 # write out a start script
-cat <<EOF > ${BUILD_DIR}/start-oauth2-proxy.sh
-#!/usr/bin/env bash
-
-set -e
-
-if [ -z \${PORT+x} ]; then echo "please set PORT"; exit; fi
-if [ -z \${COOKIE_DOMAIN+x} ]; then echo "please set COOKIE_DOMAIN"; exit; fi
-if [ -z \${PROVIDER+x} ]; then echo "please set PROVIDER"; exit; fi
-if [ -z \${APP+x} ]; then echo "please set APP"; exit; fi
-if [ -z \${OAUTH2_PROXY_CLIENT_ID+x} ]; then echo "please set OAUTH2_PROXY_CLIENT_ID"; exit; fi
-if [ -z \${OAUTH2_PROXY_CLIENT_SECRET+x} ]; then echo "please set OAUTH2_PROXY_CLIENT_SECRET"; exit; fi
-if [ -z \${OAUTH2_PROXY_COOKIE_SECRET+x} ]; then echo "please set OAUTH2_PROXY_COOKIE_SECRET"; exit; fi
-
-echo "starting oauth2_proxy..."
-oauth2_proxy  \
---http-address=http://:\$PORT \
---cookie-domain=\${COOKIE_DOMAIN} \
---provider="\${PROVIDER}" \
---email-domain="*" \
---redirect-url=\${APP}/oauth2/callback \
---set-xauthrequest=true \
---pass-access-token=true \
---upstream=https://127.0.0.1:8080 &
-EOF
-
-# put this under .profile.d so that the dyno gets it at runtime
-cat <<EOF > ${PROFILED_DIR}/golang.sh
-#!/bin/bash
-set -e
-export GOHOME=/app/.gohome
-export GOROOT=/app/.gohome/go
-export GOPATH=/app/go
-export PATH=/app/go/bin:/app/.gohome/go/bin:$PATH
-EOF
-
-# for future buildpacks during slug compilation
-cat <<EOF > ${BP_DIR}/export
-#!/bin/bash
-set -e
-export GOHOME=$GOHOME
-export GOROOT=$GOROOT
-export GOPATH=$BUILD_DIR/go
-export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
-EOF
-
-chmod +x ${BUILD_DIR}/start-oauth2-proxy.sh
-chmod +x ${PROFILED_DIR}/golang.sh
-chmod +x ${BP_DIR}/export
-
-echo "-----> Installed GoLang1.8.3"
-
-which go
-
-echo "grabbing oauth2_proxy..."
-
-go get github.com/pallavkothari/oauth2_proxy
-
-echo "got it"
+cp "${BP_DIR}"/../scripts/start_*.sh "${BUILD_DIR}/bin"
