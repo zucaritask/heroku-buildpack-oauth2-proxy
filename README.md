@@ -3,7 +3,7 @@
 Installs [pusher/oauth2_proxy](https://github.com/pusher/oauth2_proxy)
 
 ```console
-heroku buildpacks:add https://github.com/cfra/heroku-buildpack-oauth2-proxy
+heroku buildpacks:add cfra/oauth2-proxy
 ```
 
 ## Starting on heroku
