@@ -1,35 +1,131 @@
 # heroku-buildpack-oauth2-proxy
 
-Installs [pusher/oauth2_proxy](https://github.com/pusher/oauth2_proxy)
+With this buildpack, you can easily add authentication against an OAuth2 provider
+such as Github or Google to your Heroku application.
+
+For that purpose, it installs [pusher/oauth2_proxy](https://github.com/pusher/oauth2_proxy)
+as a reverse proxy for your application.
+
+One usecase where this might come in handy is if you want to serve static files with Heroku,
+but need some method to ensure only users from your organization will be able to access it.
+
+The following section guides you through the process how to create such a setup using
+[heroku-buildpack-static](https://github.com/heroku/heroku-buildpack-static)
+and this buildpack.
+
+If you'd rather use this buildpack to secure a different application, it might still be
+useful to walk through this example once to get familiar with the setup procedure. However
+you might also skip ahead to the [section after that](#usage-with-other-applications).
+
+## Getting started
+
+First, clone the example tree and switch into it:
 
 ```console
+git clone https://github.com/cfra/heroku-buildpack-oauth2-proxy -b example-static oauth2-example
+cd oauth2-example
+```
+
+Then, create a new Heroku application and set the buildpacks:
+
+```console
+heroku create
+heroku buildpacks:set https://github.com/heroku/heroku-buildpack-static.git
 heroku buildpacks:add cfra/oauth2-proxy
 ```
 
-## Starting on heroku
+You need an account for the proxy so that it can interface with your OAuth provider.
+For this example, we will be using Github.
 
-You need to ensure both your backend and `oauth2_proxy` are started by your
-`Procfile`. The easiest way is the provided script `start_with_oauth2_proxy.sh`.
+Create a new OAuth app in the [Github developer settings](https://github.com/settings/developers).
+Ensure that the "Authorization callback URL" is set correctly. For example, if you are using
+`herokuapp.com` and your application is called `ancient-woodland-33672`, you should set the
+callback URL to: `https://ancient-woodland-33672.herokuapp.com/oauth2/callback`.
 
-Pass in the call to start your backend as its arguments. For example, the
-[heroku-buildpack-static](https://github.com/heroku/heroku-buildpack-static)
-has `/app/bin/boot` as entrypoint. Given that, a usable `Procfile` to run it
-with the proxy could look as following:
+After having created the OAuth app successfully, you will be shown a /Client ID/ and a /Client Secret/,
+which you need to configure on the Heroku app:
+
+```console
+heroku config:set OAUTH2_PROXY_CLIENT_ID=0123456789abcdef1234
+heroku config:set OAUTH2_PROXY_CLIENT_SECRET=0123456789abcdef0123456789abcdef01234567
+```
+
+Furthermore, you need to specify that Github should be used as authentication provider
+and provide a secret key for encrypting the session cookies:
+
+```console
+heroku config:set OAUTH2_PROXY_PROVIDER=github
+heroku config:set OAUTH2_PROXY_COOKIE_SECRET=$(python -c \
+    'from secrets import token_urlsafe; print(token_urlsafe(32)[:32])' \
+)
+```
+
+Now, you are all set and can deploy the example application:
+
+```console
+git push heroku HEAD:master
+```
+
+You will see the buildlog for you application followed by a message about successful
+deployment.
+
+When you now navigate to your application on Heroku, following the name from the example it would
+be at `https://ancient-woodland-33672.herokuapp.com/`, you will be prompted to login with Github.
+
+After successful authentication, Github will redirect you back to your applicatio and a success
+message will be shown.
+
+For futher steps, you might want to have a look in the [configuration Section](#configuration) to
+learn about configuration options for finer grained authentication, e.g. allowing only members
+of a particular Github organization.
+
+## Usage with other applications
+
+For Using this buildpack with your application you need to do two things:
+
+On the one hand, you need to setup the configuration for `oauth2_proxy`. The getting started section
+describes this process for Github. For other providers, a look at the
+[configuration Section](#configuration) and at the
+[OAuth Provider Configuration documentation of oauth2\_proxy](https://github.com/pusher/oauth2_proxy#oauth-provider-configuration)
+will provide you with the necessary information.
+
+On the other hand, you need to ensure that `oauth2_proxy` is run as a reverse proxy in front
+of your actual application worker.
+
+For that purpose, this buildpack installs a script `start_with_oauth2_proxy.sh`. This script
+can be used as the `web` process will pass any requests to the backend process specified as
+its arguments.
+
+For example, the `heroku-buildpack-static` has `/app/bin/boot` as entrypoint. Given that,
+a usable `Procfile` to run it with the proxy looks as following:
 
 ```console
 web: /app/bin/start_with_oauth2_proxy.sh /app/bin/boot
 ```
+
+This will take care to start both `/app/bin/boot` and `oauth2_proxy` and to route any incoming
+requests correctly.
 
 ## Configuration
 
 The following environment variables are required:
 
 - `OAUTH2_PROXY_PROVIDER`: The provider to use. Something like `github`, `google` or `facebook`
-- `OAUTH2_PROXY_CLIENT_ID`: The oauth2 client id (generated by auth provider)
-- `OAUTH2_PROXY_CLIENT_SECRET`: The oauth2 client secret (generated by auth provider)
-- `OAUTH2_PROXY_COOKIE_SECRET`: Secret key to encrypt `oauth2_proxy`'s session cookies
+- `OAUTH2_PROXY_CLIENT_ID`: The OAuth2 client id (generated by auth provider)
+- `OAUTH2_PROXY_CLIENT_SECRET`: The OAuth2 client secret (generated by auth provider)
+- `OAUTH2_PROXY_COOKIE_SECRET`: Secret key to encrypt `oauth2_proxy`'s session cookies. This string
+  needs to be 32 characters long.
 
 Optionally, you can provide the following:
 
-- `OAUTH2_GITHUB_ORG`: Only allows login for members of the given github organization
-- `OAUTH2_EMAIL_DOMAIN`: Only allows login for users with emails from this domain
+- `OAUTH2_GITHUB_ORG`: Only allow login for members of the given github organization
+- `OAUTH2_EMAIL_DOMAIN`: Only allow login for users with emails from this domain
+
+## Contributing
+
+Should you encounter any issues with using this buildpack or find any bugs, I would be glad if
+you file an issue with this Github project.
+
+Also, the current configuration options are quite limited and specific to Github. If you need
+support for configuration of other authentication providers, feel free to open a pull request
+or file an enhancement proposal.
