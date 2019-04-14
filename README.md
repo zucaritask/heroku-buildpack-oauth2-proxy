@@ -1,20 +1,22 @@
 # heroku-buildpack-oauth2-proxy
 
-With this buildpack, you can easily add authentication against an OAuth2 provider
-such as Github or Google to your Heroku application.
+With this buildpack, you can add authentication against an OAuth2 provider
+such as Github or Google to your Heroku deployment.
 
-For that purpose, it installs [pusher/oauth2_proxy](https://github.com/pusher/oauth2_proxy)
-as a reverse proxy for your application.
+Authentication is provided by putting [pusher/oauth2_proxy](https://github.com/pusher/oauth2_proxy)
+in front of your application as a reverse proxy, allowing you to authenticate
+users using OAuth2 without actually implementing OAuth2 in your applications
+codebase.
 
 One usecase where this might come in handy is if you want to serve static files with Heroku,
-but need some method to ensure only users from your organization will be able to access it.
+but need some method to ensure only users from your organization will be able to access them.
 
-The following section guides you through the process how to create such a setup using
+The following section guides you through the process of creating such a setup using
 [heroku-buildpack-static](https://github.com/heroku/heroku-buildpack-static)
 and this buildpack.
 
 If you'd rather use this buildpack to secure a different application, it might still be
-useful to walk through this example once to get familiar with the setup procedure. However
+useful to walk through this example once to get familiar with the setup procedure. However,
 you might also skip ahead to the [section after that](#usage-with-other-applications).
 
 ## Getting started
@@ -42,7 +44,7 @@ Ensure that the "Authorization callback URL" is set correctly. For example, if y
 `herokuapp.com` and your application is called `ancient-woodland-33672`, you should set the
 callback URL to: `https://ancient-woodland-33672.herokuapp.com/oauth2/callback`.
 
-After having created the OAuth app successfully, you will be shown a /Client ID/ and a /Client Secret/,
+After having created the OAuth app successfully, you will be shown a _Client ID_ and a _Client Secret_,
 which you need to configure on the Heroku app:
 
 ```console
@@ -60,20 +62,20 @@ heroku config:set OAUTH2_PROXY_COOKIE_SECRET=$(python -c \
 )
 ```
 
-Now, you are all set and can deploy the example application:
+Now, you are all set and can start the first deployment of your example application:
 
 ```console
 git push heroku HEAD:master
 ```
 
-You will see the buildlog for you application followed by a message about successful
+You will see the buildlog for your application, followed by a message about successful
 deployment.
 
-When you now navigate to your application on Heroku, following the name from the example it would
-be at `https://ancient-woodland-33672.herokuapp.com/`, you will be prompted to login with Github.
+When you now navigate to your application on Heroku (following the name from the example it would
+be at `https://ancient-woodland-33672.herokuapp.com/`) you will be prompted to login with Github.
 
-After successful authentication, Github will redirect you back to your applicatio and a success
-message will be shown.
+After successful authentication, Github will redirect you back to your application and a success
+page will be shown.
 
 For futher steps, you might want to have a look in the [configuration Section](#configuration) to
 learn about configuration options for finer grained authentication, e.g. allowing only members
@@ -81,9 +83,9 @@ of a particular Github organization.
 
 ## Usage with other applications
 
-For Using this buildpack with your application you need to do two things:
+For Using this buildpack with your application, you need to do two things:
 
-On the one hand, you need to setup the configuration for `oauth2_proxy`. The getting started section
+On the one hand, you need to set up the configuration for `oauth2_proxy`. The getting started section
 describes this process for Github. For other providers, a look at the
 [configuration Section](#configuration) and at the
 [OAuth Provider Configuration documentation of oauth2\_proxy](https://github.com/pusher/oauth2_proxy#oauth-provider-configuration)
@@ -93,7 +95,7 @@ On the other hand, you need to ensure that `oauth2_proxy` is run as a reverse pr
 of your actual application worker.
 
 For that purpose, this buildpack installs a script `start_with_oauth2_proxy.sh`. This script
-can be used as the `web` process will pass any requests to the backend process specified as
+can be used as the `web` process and will pass any requests to the backend process specified as
 its arguments.
 
 For example, the `heroku-buildpack-static` has `/app/bin/boot` as entrypoint. Given that,
