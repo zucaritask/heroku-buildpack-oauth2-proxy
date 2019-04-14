@@ -17,7 +17,7 @@ and this buildpack.
 
 If you'd rather use this buildpack to secure a different application, it might still be
 useful to walk through this example once to get familiar with the setup procedure. However,
-you might also skip ahead to the [section after that](#usage-with-other-applications).
+you might also skip ahead to the section [usage with other applications](#usage-with-other-applications).
 
 ## Getting started
 
