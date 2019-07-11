@@ -12,7 +12,9 @@ if [ -z ${OAUTH2_PROXY_COOKIE_SECRET+x} ]; then echo "please set OAUTH2_PROXY_CO
 
 OPTIONS=( )
 if [ -n "${OAUTH2_EMAIL_DOMAIN}" ]; then
-    OPTIONS=( "${OPTIONS[@]}" "--email-domain=${OAUTH2_EMAIL_DOMAIN}" )
+    for EMAIL_DOMAIN in $(echo "${OAUTH2_EMAIL_DOMAIN}" | tr ',' '\n'); do
+        OPTIONS=( "${OPTIONS[@]}" "--email-domain=${EMAIL_DOMAIN}" )
+    done
 else
     OPTIONS=( "${OPTIONS[@]}" "--email-domain=*" )
 fi
