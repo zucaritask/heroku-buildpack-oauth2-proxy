@@ -2,8 +2,8 @@
 
 set -eo pipefail
 
-OAUTH2_PROXY_VERSION="v3.2.0"
-OAUTH2_PROXY_CHECKSUM="fac3c8e8a809d4086d1dfd52c4897b79a49132fb97374bd0837f484ba002689a"
+OAUTH2_PROXY_VERSION="v4.0.0"
+OAUTH2_PROXY_CHECKSUM="20537fdeb0806ad9bc0273cb1e208a8802c3730c95eb53d31dce370e939c4e45"
 
 BP_DIR="$(cd $(dirname "$0"); pwd)"
 BUILD_DIR="$1"
@@ -11,13 +11,11 @@ BUILD_DIR="$1"
 mkdir -p "$BUILD_DIR/bin"
 
 echo "downloading oauth2_proxy..."
-wget --no-verbose "https://github.com/pusher/oauth2_proxy/releases/download/${OAUTH2_PROXY_VERSION}/oauth2_proxy-${OAUTH2_PROXY_VERSION}.linux-amd64.go1.11.tar.gz"
+wget --no-verbose "https://github.com/pusher/oauth2_proxy/releases/download/${OAUTH2_PROXY_VERSION}/oauth2_proxy-${OAUTH2_PROXY_VERSION}.linux-amd64.go1.12.1.tar.gz"
 mv oauth2_proxy-*.tar.gz oauth2_proxy.tar.gz
 echo "$OAUTH2_PROXY_CHECKSUM  oauth2_proxy.tar.gz" | sha256sum -c -
-tar -xzf oauth2_proxy.tar.gz
+tar -xzf oauth2_proxy.tar.gz -C "$BUILD_DIR/bin" --strip-components=1
 rm oauth2_proxy.tar.gz
-mv release/oauth2_proxy-linux-amd64 $BUILD_DIR/bin/oauth2_proxy
-rmdir release
 
 # write out a start script
 cp "${BP_DIR}"/../scripts/start_*.sh "${BUILD_DIR}/bin"
