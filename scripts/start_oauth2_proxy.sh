@@ -10,24 +10,29 @@ if [ -z ${OAUTH2_PROXY_CLIENT_ID+x} ]; then echo "please set OAUTH2_PROXY_CLIENT
 if [ -z ${OAUTH2_PROXY_CLIENT_SECRET+x} ]; then echo "please set OAUTH2_PROXY_CLIENT_SECRET"; exit 1; fi
 if [ -z ${OAUTH2_PROXY_COOKIE_SECRET+x} ]; then echo "please set OAUTH2_PROXY_COOKIE_SECRET"; exit 1; fi
 
-OPTIONS=( )
+OAUTH2_PROXY_SET_XAUTHREQUEST="${OAUTH2_PROXY_SET_XAUTHREQUEST:-true}"
+export OAUTH2_PROXY_SET_XAUTHREQUEST
+
+OAUTH2_PROXY_PASS_ACCESS_TOKEN="${OAUTH2_PROXY_PASS_ACCESS_TOKEN:-true}"
+export OAUTH2_PROXY_PASS_ACCESS_TOKEN
+
+OAUTH2_PROXY_UPSTREAMS="${OAUTH2_PROXY_UPSTREAMS:-http://127.0.0.1:8080}"
+export OAUTH2_PROXY_UPSTREAMS
+
+OAUTH2_PROXY_HTTP_ADDRESS="${OAUTH2_PROXY_HTTP_ADDRESS:-http://:$PORT}"
+export OAUTH2_PROXY_HTTP_ADDRESS
+
 if [ -n "${OAUTH2_EMAIL_DOMAIN}" ]; then
-    for EMAIL_DOMAIN in $(echo "${OAUTH2_EMAIL_DOMAIN}" | tr ',' '\n'); do
-        OPTIONS=( "${OPTIONS[@]}" "--email-domain=${EMAIL_DOMAIN}" )
-    done
+    OAUTH2_PROXY_EMAIL_DOMAINS="${OAUTH2_EMAIL_DOMAIN}"
 else
-    OPTIONS=( "${OPTIONS[@]}" "--email-domain=*" )
+    OAUTH2_PROXY_EMAIL_DOMAINS="*"
 fi
+export OAUTH2_PROXY_EMAIL_DOMAINS
 
 if [ -n "${OAUTH2_GITHUB_ORG}" ]; then
-    OPTIONS=( "${OPTIONS[@]}" "--github-org=${OAUTH2_GITHUB_ORG}" )
+    OAUTH2_PROXY_GITHUB_ORG="${OAUTH2_GITHUB_ORG}"
+    export OAUTH2_PROXY_GITHUB_ORG
 fi
 
 echo "starting oauth2_proxy..."
-exec ./oauth2_proxy \
-       --http-address=http://:$PORT \
-       --provider="${OAUTH2_PROXY_PROVIDER}" \
-       --set-xauthrequest=true \
-       --pass-access-token=true \
-       --upstream=http://127.0.0.1:8080 \
-       "${OPTIONS[@]}"
+exec ./oauth2_proxy
