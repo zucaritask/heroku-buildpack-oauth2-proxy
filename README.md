@@ -123,16 +123,15 @@ The following environment variables are required:
 - `OAUTH2_PROXY_COOKIE_SECRET`: Secret key to encrypt `oauth2_proxy`'s session cookies. This string
   needs to be 32 characters long.
 
-Optionally, you can provide the following:
+Any further configuration of `oauth2_proxy` can also be done via environment variables.
 
-- `OAUTH2_GITHUB_ORG`: Only allow login for members of the given GitHub organization
-- `OAUTH2_EMAIL_DOMAIN`: Only allow login for users with emails from this domain
+This is described [here](https://oauth2-proxy.github.io/oauth2-proxy/configuration#environment-variables)
+in its documentation.
 
 ## Contributing
 
 Should you encounter any issues while using this buildpack or discover any bugs, I would be glad if
 you [file an issue](https://github.com/cfra/heroku-buildpack-oauth2-proxy/issues) with this GitHub project.
 
-Also, the current configuration options are quite limited and specific to GitHub. If you need
-support for configuration of other authentication providers, feel free to open a pull request
-or file an enhancement proposal.
+Also, if you feel there is anything which should be improved, go ahead and open a pull request or file an
+enhancement proposal.
