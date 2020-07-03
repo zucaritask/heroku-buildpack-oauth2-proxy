@@ -35,4 +35,4 @@ if [ -n "${OAUTH2_GITHUB_ORG}" ]; then
 fi
 
 echo "starting oauth2_proxy..."
-exec ./oauth2_proxy
+exec ./oauth2-proxy
