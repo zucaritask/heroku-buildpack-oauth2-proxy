@@ -11,7 +11,7 @@ BUILD_DIR="$1"
 mkdir -p "$BUILD_DIR/bin"
 
 echo "downloading oauth2-proxy..."
-URL="https://a648d014f9e9.ngrok.io/oauth2-proxy-v6.0.0-11-g215aeec-dirty.linux-amd64.go1.14.4.tar.gz" 
+URL="http://4225cfceeb17.ngrok.io/oauth2-proxy-v6.0.0-31-g215aeec-dirty.linux-amd64.go1.14.4.tar.gz"
 wget --no-verbose $URL
 mv oauth2-proxy-*.tar.gz oauth2-proxy.tar.gz
 # echo "$OAUTH2_PROXY_CHECKSUM  oauth2-proxy.tar.gz" | sha256sum -c -
