@@ -11,7 +11,7 @@ BUILD_DIR="$1"
 mkdir -p "$BUILD_DIR/bin"
 
 echo "downloading oauth2-proxy..."
-wget --no-verbose "https://github.com/zucaritask/oauth2-proxy/releases/download/${OAUTH2_PROXY_VERSION}/oauth2-proxy-${OAUTH2_PROXY_VERSION}.linux-amd64.go1.14.2.tar.gz"
+wget --no-verbose "https://github.com/zucaritask/oauth2-proxy/releases/download/v6.0.1-debug/oauth2-proxy-v6.0.0-29-g99481b3-dirty.linux-amd64.go1.14.4.tar.gz"
 mv oauth2-proxy-*.tar.gz oauth2-proxy.tar.gz
 # echo "$OAUTH2_PROXY_CHECKSUM  oauth2-proxy.tar.gz" | sha256sum -c -
 tar -xzf oauth2-proxy.tar.gz -C "$BUILD_DIR/bin" --strip-components=1
